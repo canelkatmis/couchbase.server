@@ -1,0 +1,31 @@
+---
+- name: Check if cluster is already created
+  stat:
+    path: "/var/log/.couchbase_cluster_created"
+  register: couchbase_cluster_created
+  when: inventory_hostname==groups['couchbases'][0]
+
+- name: Create cluster
+  shell: >
+          {{ couchbase_cli }} cluster-init
+          --cluster {{ inventory_hostname }}:{{ couchbase_cluster_port }}
+          --cluster-name={{ creation_index }}.{{ subdomain_name }}.{{ domain_name }}
+          --cluster-username={{ couchbase_admin_user }}
+          --cluster-password={{ couchbase_admin_pass }}
+          --cluster-port={{ couchbase_cluster_port }}
+          --cluster-ramsize={{ couchbase_cluster_ram_quota }}
+          --cluster-index-ramsize={{ couchbase_cluster_index_ram_quota }}
+          --cluster-fts-ramsize={{ couchbase_cluster_fts_ram_quota }}
+          --services=data
+  register: cluster_created
+  when: >
+        inventory_hostname==groups['couchbases'][0] and
+        not couchbase_cluster_created.stat.exists
+
+- name: Mark cluster as created
+  file:
+    dest: "/var/log/.couchbase_cluster_created"
+    state: touch
+  when: >
+        inventory_hostname==groups['couchbases'][0] and
+        cluster_created.changed

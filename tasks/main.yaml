@@ -1,0 +1,27 @@
+---
+#based on: https://github.com/mrlesmithjr/ansible-couchbase
+#tested with cb version: '5.1.1' and Ubuntu 16
+
+- name: Optimize OS
+  include: optimize.yaml
+
+- name: Customize OS
+  include: customize.yaml
+
+- name: Install Couchbase
+  include: install.yaml
+
+- name: Initialize Nodes
+  include: init_node.yaml
+
+- name: Initialize Cluster
+  include: init_cluster.yaml
+
+- name: Join to Cluster
+  include: join_cluster.yaml
+
+- name: Initialize Buckets
+  include: init_bucket.yaml
+
+- name: Initialize Users
+  include: init_user.yaml

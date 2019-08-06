@@ -1,0 +1,47 @@
+---
+- name: List current buckets
+  shell: >
+          {{ couchbase_cli }} bucket-list
+          -c 127.0.0.1:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+  register: couchbase_bucket_list
+  run_once: true
+  changed_when: false
+
+- name: Create buckets that have a customized port
+  shell: >
+          {{ couchbase_cli }} bucket-create
+          -c 127.0.0.1:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+          --bucket={{ item.name }}
+          --bucket-ramsize={{ item.ram }}
+          --bucket-type={{ item.type }}
+          --bucket-replica={{ couchbase_bucket_replica }}
+          --bucket-port={{ item.port }}
+          --bucket-eviction-policy={{ couchbase_bucket_eviction_policy }}
+          --enable-index-replica={{ couchbase_bucket_index_replica }}
+  run_once: true
+  with_items: '{{ couchbase_buckets }}'
+  when: >
+        item.name not in couchbase_bucket_list.stdout and
+        item.port is defined
+
+- name: Create buckets that have NOT a customized port
+  shell: >
+          {{ couchbase_cli }} bucket-create
+          -c 127.0.0.1:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+          --bucket={{ item.name }}
+          --bucket-ramsize={{ item.ram }}
+          --bucket-type={{ item.type }}
+          --bucket-replica={{ couchbase_bucket_replica }}
+          --bucket-eviction-policy={{ couchbase_bucket_eviction_policy }}
+          --enable-index-replica={{ couchbase_bucket_index_replica }}
+  run_once: true
+  with_items: '{{ couchbase_buckets }}'
+  when: >
+        item.name not in couchbase_bucket_list.stdout and
+        item.port is not defined

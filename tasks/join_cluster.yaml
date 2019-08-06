@@ -1,0 +1,39 @@
+---
+- name: Check if joined to cluster
+  stat:
+    path: "/var/log/.couchbase_joined_cluster"
+  register: couchbase_joined_cluster
+  when: inventory_hostname!=groups['couchbases'][0]
+
+- name: Join cluster
+  shell: >
+          {{ couchbase_cli }} server-add
+          -c {{ hostvars[groups['couchbases'][0]].inventory_hostname }}:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+          --server-add={{ inventory_hostname }}:{{ couchbase_cluster_port }}
+          --server-add-username={{ couchbase_admin_user }}
+          --server-add-password={{ couchbase_admin_pass }}
+          --service=data
+  register: joined_cluster
+  when: >
+        inventory_hostname!=groups['couchbases'][0] and
+        not couchbase_joined_cluster.stat.exists
+
+- name: Rebalance cluster
+  shell: >
+          {{ couchbase_cli }} rebalance
+          -c {{ hostvars[groups['couchbases'][0]].inventory_hostname }}:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+  when: >
+        inventory_hostname!=groups['couchbases'][0] and
+        not couchbase_joined_cluster.stat.exists
+
+- name: Mark as joined cluster
+  file:
+    dest: "/var/log/.couchbase_joined_cluster"
+    state: touch
+  when: >
+        inventory_hostname!=groups['couchbases'][0] and
+        joined_cluster.changed

@@ -1,0 +1,25 @@
+---
+- name: List current users
+  shell: >
+          {{ couchbase_cli }} user-manage
+          -c 127.0.0.1:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+          --list
+  register: couchbase_user_list
+  run_once: true
+  changed_when: false
+
+- name: Create bucket admin user
+  shell: >
+          {{ couchbase_cli }} user-manage
+          -c 127.0.0.1:{{ couchbase_cluster_port }}
+          -u {{ couchbase_admin_user }}
+          -p {{ couchbase_admin_pass }}
+          --set
+          --rbac-username {{ couchbase_bucket_admin_user }}
+          --rbac-password {{ couchbase_bucket_admin_pass }}
+          --roles bucket_full_access[*]
+          --auth-domain local
+  run_once: true
+  when: couchbase_bucket_admin_user not in couchbase_user_list.stdout

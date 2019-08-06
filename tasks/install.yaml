@@ -1,0 +1,29 @@
+---
+- name: Install pre-reqs
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - libssl-dev
+
+- name: Download Couchbase server
+  get_url:
+    url: "{{ package.link }}/{{ package.name }}"
+    dest: "/opt/{{ package.name }}"
+
+- name: Install Couchbase server
+  apt:
+    deb: "/opt/{{ package.name }}"
+    state: present
+
+- name: Ensure Couchbase started and enabled
+  systemd:
+    name: couchbase-server
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Wait for api port
+  wait_for:
+    port: "{{ couchbase_cluster_port }}"

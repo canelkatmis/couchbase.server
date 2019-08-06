@@ -1,0 +1,22 @@
+---
+- name: Add Couchbase group
+  group:
+    name: couchbase
+
+- name: Add Couchbase user
+  user:
+    name: couchbase
+    group: couchbase
+    shell: /bin/bash
+    home: "{{ couchbase_home_path }}"
+
+- name: Create stateful data folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: couchbase
+    group: couchbase
+    mode: 0744
+  with_items:
+    - "{{ couchbase_data_path }}"
+    - "{{ couchbase_index_path }}"

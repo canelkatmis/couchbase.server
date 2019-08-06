@@ -1,0 +1,23 @@
+---
+- name: Check if node is already initialized
+  stat:
+    path: "/var/log/.couchbase_node_initialized"
+  register: couchbase_node_initialized
+
+- name: Init node
+  shell: >
+          {{ couchbase_cli }} node-init
+          --cluster {{ inventory_hostname }}:{{ couchbase_cluster_port }}
+          --username={{ couchbase_admin_user }}
+          --password={{ couchbase_admin_pass }}
+          --node-init-data-path={{ couchbase_data_path }}
+          --node-init-index-path={{ couchbase_index_path }}
+          --node-init-hostname={{ inventory_hostname }}
+  register: node_initialized
+  when: not couchbase_node_initialized.stat.exists
+
+- name: Mark as node initialized
+  file:
+    dest: "/var/log/.couchbase_node_initialized"
+    state: touch
+  when: node_initialized.changed

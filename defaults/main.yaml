@@ -1,0 +1,31 @@
+---
+package:
+  name: 'couchbase-server-community_{{ couchbase_version }}-{{ ansible_distribution|lower }}{{ ansible_distribution_version }}_amd64.deb'
+  link: 'http://packages.couchbase.com/releases/{{ couchbase_version }}'
+
+couchbase_cli: '/opt/couchbase/bin/couchbase-cli'
+couchbase_home_path: '/opt/couchbase'
+
+couchbase_cluster_port: '8091'
+
+couchbase_data_path: '/cbdata'
+couchbase_index_path: '/cbindex'
+
+couchbase_version: '5.1.1'
+
+couchbase_cluster_ram_multiplier: 0.5
+couchbase_cluster_ram_quota: '{{ (ansible_memtotal_mb | int * couchbase_cluster_ram_multiplier) | round | int }}'
+couchbase_cluster_index_ram_quota: 256
+couchbase_cluster_fts_ram_quota: 256
+
+couchbase_admin_user: 'admin'
+couchbase_admin_pass: 'password'
+
+couchbase_buckets:
+  - name: 'test-bucket'
+    ram: 256
+    type: 'couchbase'
+#couchbase bucket size is for only one node
+couchbase_bucket_replica: 0
+couchbase_bucket_eviction_policy: 'fullEviction'
+couchbase_bucket_index_replica: 0
