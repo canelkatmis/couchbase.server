@@ -1,2 +1,2 @@
 # couchbase.server
-Couchbase roles for ansible
+Couchbase role for ansible
