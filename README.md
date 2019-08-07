@@ -1,7 +1,7 @@
 # couchbase.server
 Couchbase role for ansible
 
-Don't forget to use  a `couchbases` groups inside ansible inventory
+Don't forget to use  a `couchbases` group inside ansible inventory
 ```
 [couchbases]
 couchbase-host-1
